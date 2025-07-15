@@ -3,10 +3,34 @@
 body {
     background-color: var(--bs-dark);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
 }
 
-.container {
-    max-width: 1000px;
+.container-fluid {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Optimize side-by-side layout */
+.row {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+}
+
+.col-lg-4, .col-lg-8 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+/* Fixed height for better layout */
+.left-column {
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.right-column {
+    height: calc(100vh - 120px);
+    overflow-y: auto;
 }
 
 /* Card styling */
@@ -64,6 +88,17 @@ body {
 }
 
 /* Responsive adjustments */
+@media (max-width: 991px) {
+    .left-column, .right-column {
+        height: auto;
+        overflow-y: visible;
+    }
+    
+    .col-lg-4 {
+        margin-bottom: 1rem;
+    }
+}
+
 @media (max-width: 768px) {
     .display-4 {
         font-size: 2rem;
@@ -80,6 +115,10 @@ body {
     
     .progress {
         margin-top: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
     }
 }
 
