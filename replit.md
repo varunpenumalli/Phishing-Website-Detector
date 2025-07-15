@@ -31,7 +31,15 @@ The architecture prioritizes simplicity and ease of deployment, making it suitab
 - Custom heuristic-based analysis system
 - Scoring mechanism that evaluates URLs against multiple criteria
 - Detailed reporting of analysis results with explanations
-- Currently implements checks for IP addresses and special characters
+- Comprehensive detection methods including:
+  - IP address usage instead of domain names
+  - Suspicious symbols and special characters
+  - URL length analysis
+  - HTTPS protocol verification
+  - Domain structure analysis (subdomains, hyphens)
+  - Common phishing keywords detection
+  - URL shortener identification
+  - Random character sequence detection (new feature)
 
 ### Frontend Interface
 - **Templates**: HTML templates with Bootstrap dark theme integration

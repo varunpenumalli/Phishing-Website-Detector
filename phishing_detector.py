@@ -1,5 +1,6 @@
 import re
 import urllib.parse
+import random
 from typing import Dict, List, Any
 
 class PhishingDetector:
@@ -114,6 +115,17 @@ class PhishingDetector:
                 'severity': 'medium'
             })
         
+        # 9. Check for random character sequences
+        random_score, random_parts = self._check_random_sequences(url)
+        if random_score > 0:
+            score += random_score
+            details.append({
+                'check': 'Random Character Sequences',
+                'points': random_score,
+                'description': f'Contains suspicious random sequences: {", ".join(random_parts)}',
+                'severity': 'medium'
+            })
+        
         verdict = self._classify_score(score)
         
         return {
@@ -157,6 +169,111 @@ class PhishingDetector:
         ]
         
         return hostname.lower() in shorteners
+    
+    def _check_random_sequences(self, url: str) -> tuple:
+        """Check for random character sequences that might indicate phishing."""
+        random_parts = []
+        
+        # Parse URL to check different parts
+        parsed_url = urllib.parse.urlparse(url)
+        
+        # Check hostname parts (subdomains and domain)
+        if parsed_url.hostname:
+            hostname_parts = parsed_url.hostname.split('.')
+            for part in hostname_parts:
+                if self._is_random_sequence(part):
+                    random_parts.append(part)
+        
+        # Check path parts
+        if parsed_url.path:
+            path_parts = parsed_url.path.split('/')
+            for part in path_parts:
+                if len(part) > 6 and self._is_random_sequence(part):
+                    random_parts.append(part)
+        
+        # Check query parameters
+        if parsed_url.query:
+            query_parts = parsed_url.query.split('&')
+            for part in query_parts:
+                if '=' in part:
+                    key, value = part.split('=', 1)
+                    if len(value) > 8 and self._is_random_sequence(value):
+                        random_parts.append(value[:15] + '...' if len(value) > 15 else value)
+        
+        # Score based on number of random sequences found
+        score = min(len(random_parts) * 2, 6)  # Max 6 points for this check
+        
+        return score, random_parts[:3]  # Return max 3 examples to avoid clutter
+    
+    def _is_random_sequence(self, text: str) -> bool:
+        """
+        Determine if a text string appears to be a random sequence.
+        Uses multiple heuristics to identify random-looking strings.
+        """
+        if not text or len(text) < 6:
+            return False
+        
+        # Remove common extensions and known patterns
+        text_lower = text.lower()
+        
+        # Skip common legitimate patterns
+        common_patterns = [
+            'www', 'mail', 'blog', 'shop', 'news', 'admin', 'user', 'test',
+            'dev', 'api', 'cdn', 'static', 'assets', 'media', 'images',
+            'index', 'home', 'about', 'contact', 'login', 'register',
+            'google', 'facebook', 'amazon', 'microsoft', 'apple'
+        ]
+        
+        if any(pattern in text_lower for pattern in common_patterns):
+            return False
+        
+        # Check for excessive consonants or vowels in a row
+        vowels = 'aeiou'
+        consonant_streak = 0
+        vowel_streak = 0
+        max_consonant_streak = 0
+        max_vowel_streak = 0
+        
+        for char in text_lower:
+            if char.isalpha():
+                if char in vowels:
+                    vowel_streak += 1
+                    consonant_streak = 0
+                    max_vowel_streak = max(max_vowel_streak, vowel_streak)
+                else:
+                    consonant_streak += 1
+                    vowel_streak = 0
+                    max_consonant_streak = max(max_consonant_streak, consonant_streak)
+        
+        # Random sequences often have long consonant or vowel streaks
+        if max_consonant_streak >= 4 or max_vowel_streak >= 3:
+            return True
+        
+        # Check for lack of common letter patterns
+        common_bigrams = ['th', 'he', 'in', 'er', 'an', 're', 'ed', 'nd', 'ha', 'to']
+        bigram_count = 0
+        
+        for i in range(len(text_lower) - 1):
+            if text_lower[i:i+2] in common_bigrams:
+                bigram_count += 1
+        
+        # If very few common bigrams, likely random
+        if len(text_lower) > 8 and bigram_count < len(text_lower) * 0.15:
+            return True
+        
+        # Check for alternating character types (letter-number-letter pattern)
+        alternating_count = 0
+        for i in range(len(text) - 1):
+            if text[i].isalpha() and text[i+1].isdigit():
+                alternating_count += 1
+            elif text[i].isdigit() and text[i+1].isalpha():
+                alternating_count += 1
+        
+        # High alternating pattern suggests random generation
+        if alternating_count >= len(text) * 0.4:
+            return True
+        
+        return False
     
     def _classify_score(self, score: int) -> str:
         """Classify the risk based on score."""
