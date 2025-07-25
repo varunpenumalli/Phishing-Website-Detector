@@ -1,6 +1,6 @@
 # Phishing URL Detector
 
-A web-based application that analyzes URLs for potential phishing characteristics and provides instant risk assessments.
+A web-based application that analyses URLs for potential phishing characteristics and provides instant risk assessments.
 
 ## Features
 
@@ -10,15 +10,33 @@ A web-based application that analyzes URLs for potential phishing characteristic
 - **Detailed Reporting**: Visual risk assessment with explanations for each detection
 
 ## Detection Methods
+- IP‑literal host instead of a domain name
 
-- IP address usage instead of domain names
-- Suspicious symbols and special characters (@, excessive hyphens)
-- URL length analysis
-- HTTPS protocol verification
-- Domain structure analysis (excessive subdomains)
-- Common phishing keywords detection
-- URL shortener identification
-- Random character sequence detection
+- @ symbol anywhere in the URL
+
+- Excessive overall length ( > 75 characters )
+
+- Plain HTTP (no HTTPS)
+
+- ≥ 3 sub‑domains in the hostname
+
+- Presence of high‑risk phishing keywords (e.g. login, verify, paypal, webmail…)
+
+- Hyphens inside the registered domain
+
+- Use of a known URL‑shortener (bit.ly, t.co, …)
+
+- Random / high‑entropy character sequences in host, path or query
+
+- Top‑level domain on the high‑abuse list (e.g. .icu, .top, .click, .win…)
+
+- Double slashes // inside the path
+
+- Percent‑encoded characters in path or query (%2e, %40, …)
+
+- Non‑standard port (anything other than 80 or 443)
+
+- Free‑hosting root domain (*.weebly.com, *.000webhostapp.com, *.wixsite.com, …)
 
 ## Installation & Setup
 
@@ -66,21 +84,8 @@ phishing-detector/
 
 1. Open the web application in your browser
 2. Enter a URL in the input field (with or without http/https)
-3. Click "Analyze" to get instant results
+3. Click "Analyse" to get instant results
 4. Review the risk assessment and detailed analysis
-
-## Example URLs to Test
-
-**Legitimate URLs** (should score low):
-- https://google.com
-- https://github.com
-- https://stackoverflow.com
-
-**Suspicious URLs** (should score medium-high):
-- http://paypal-verify.suspicious-domain.com
-- https://x7k9mz2q.fake-bank.com/login
-- http://192.168.1.1/secure-banking
-- https://bit.ly/fake-link
 
 ## Risk Levels
 
@@ -96,12 +101,8 @@ phishing-detector/
 - **Responsive**: Works on desktop and mobile devices
 
 ## Deployment
-
-For production deployment, consider using:
-- Gunicorn as WSGI server
-- Environment variables for configuration
-- Reverse proxy (nginx/Apache)
-- HTTPS encryption
+Currently Deployed using Render. Due to free account, may take some time to load.
+Link: https://phishing-website-detector-6v4t.onrender.com/
 
 ## License
 
